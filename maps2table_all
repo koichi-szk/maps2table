@@ -1,0 +1,8 @@
+#!/bin/bash
+id=$1
+host=$2
+for i in maps-*
+do
+maps2table $id $host ${i##maps-} $i
+done
+

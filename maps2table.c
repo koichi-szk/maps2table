@@ -35,6 +35,7 @@ int main(int ac, char *av[])
 	char	*line;
 	char	*fname;
 	FILE	*inf;
+	bool	 is_init = true;
 
 	char *test_label = av[1];
 	char *hostname = av[2];
@@ -43,14 +44,20 @@ int main(int ac, char *av[])
 	fname = av[4];
 	inf = fopen(fname, "r");
 
+	is_init = true;
 	while (line = fgets(buff, 2048, inf))
 	{
+		if (is_init == true)
+			printf("BEGIN;\n");
+		is_init = false;
 		if ((chunk = parse_line(buff, test_label, hostname, pid, &CHUNK)) == NULL)
 			continue;
 		chunk->size = hex2long(chunk->end_address) - hex2long(chunk->start_address);
 		build_statement(&CHUNK);
 	}
 	fclose(inf);
+	if (is_init == false)
+		printf("COMMIT;\n");
 }
 
 static long
@@ -79,13 +86,17 @@ build_statement(mem_chunk *chunk)
 {
 	if (chunk->pathname)
 	{
-		printf("INSERT INTO MAPS VALUES ('%s', '%s', %d, %ld, '%s', '%s', '%s', '%s', '%s', '%s', '%s');\n",
-				chunk->test_label, chunk->hostname, chunk->pid, chunk->size, chunk->start_address, chunk->end_address, chunk->perms, chunk->offset, chunk->inode, chunk->dev, chunk->pathname);
+		printf("INSERT INTO maps VALUES ('%s', '%s', %d, %ld, '%s', '%s', '%s', '%s', '%s', '%s', '%s');\n",
+				chunk->test_label, chunk->hostname, chunk->pid, chunk->size,
+				chunk->start_address, chunk->end_address, chunk->perms, chunk->offset, chunk->inode,
+				chunk->dev, chunk->pathname);
 	}
 	else
 	{
-		printf("INSERT INTO MAPS VALUES ('%s', '%s', %d, %ld, '%s', '%s', '%s', '%s', '%s', '%s', NULL);\n",
-				chunk->test_label, chunk->hostname, chunk->pid, chunk->size, chunk->start_address, chunk->end_address, chunk->perms, chunk->offset, chunk->inode, chunk->dev);
+		printf("INSERT INTO maps VALUES ('%s', '%s', %d, %ld, '%s', '%s', '%s', '%s', '%s', '%s', NULL);\n",
+				chunk->test_label, chunk->hostname, chunk->pid, chunk->size,
+				chunk->start_address, chunk->end_address, chunk->perms, chunk->offset, chunk->inode,
+				chunk->dev);
 	}
 }
 
