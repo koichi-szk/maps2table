@@ -1,0 +1,12 @@
+#!/bin/bash
+DEST=$1
+pwd=$(pwd)
+
+mkdir -p $DEST
+cd /proc
+for i in [0-9]*
+do
+cp $i/maps $pwd/$DEST/maps-$i
+done
+
+cd $pwd
